@@ -282,6 +282,18 @@ async function handleAceitarAposta(interaction, apostaId) {
         const qrBuffer = await gerarQRCodeBuffer(payload);
         anexo = new AttachmentBuilder(qrBuffer, { name: "pix-qrcode.png" });
       }
+      const screenshotPath = path.join(__dirname, "Screenshot_20260404_145435_Inter.png");
+      const anexos = [anexo];
+      const embeds = [];
+      if (fs.existsSync(screenshotPath)) {
+        const anexoScreenshot = new AttachmentBuilder(screenshotPath, { name: "Screenshot_20260404_145435_Inter.png" });
+        anexos.push(anexoScreenshot);
+        const embedScreenshot = new EmbedBuilder()
+          .setColor(0x22c55e)
+          .setTitle("📸 Referência de Pagamento")
+          .setImage("attachment://Screenshot_20260404_145435_Inter.png");
+        embeds.push(embedScreenshot);
+      }
       const embedPix = new EmbedBuilder()
         .setTitle("💸 Pagamento via PIX")
         .setColor(0x22c55e)
@@ -292,7 +304,9 @@ async function handleAceitarAposta(interaction, apostaId) {
         )
         .setImage("attachment://pix-qrcode.png")
         .setFooter({ text: "Escaneie o QR Code ou copie a chave PIX no seu banco 💳" });
-      await ticketCanal.send({ embeds: [embedPix], files: [anexo] });
+      embeds.push(embedPix);
+      await ticketCanal.send({ embeds, files: anexos });
+
     } catch (err) {
       console.error("Erro ao enviar PIX:", err.message);
       await ticketCanal.send({
